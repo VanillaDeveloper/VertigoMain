@@ -1,3 +1,15 @@
+repeat wait()
+    
+until game:IsLoaded()
+
+--[[
+    fellow vertigo developer / moderator, fix your game. this script is opensourced. altough if you cant, goodluck.
+    aeth#9510
+    discord.gg/rbxgen
+]]
+
+
+
 local NotifLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Kinlei/Dynissimo/main/Scripts/AkaliNotif.lua"))()
 local Notify = NotifLib.Notify
 
@@ -122,6 +134,10 @@ getgenv().Settings = {
         Toggle = false,
         WalkSpeed = 16,
         JumpPower = 50,
+    },
+    ArmorDurability = {
+        Value = 125,
+        Toggle = false
     }
 }
 
@@ -156,6 +172,7 @@ local Main = Window:CreateTab("main yez!")
 local KillAuraSection = Main:CreateSector("Kill-Aura","left")
 local godSection = Main:CreateSector("god section","left")
 local Character = Main:CreateSector("Character Stuff","left")
+local Armor = Main:CreateSector("Armor Durability","right")
 
 local KillAuraToggle = KillAuraSection:AddToggle('Enabled', false, function(State)
     Notify({
@@ -191,6 +208,7 @@ local ButtonElCharge = godSection:AddButton("kill all",function(yesaction)
                        [2] = "Handle"
         }
         
+        
                   game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Tool").Events.Attack_Server:FireServer(unpack(args))
         
         local args = {
@@ -217,6 +235,19 @@ local charToggleMain = Character:AddToggle('Enabled', false, function(State)
     })
     getgenv().Settings.CharacterSettings.Toggle = State
 end)
+
+local BypasAnticheatEZ = Character:AddButton("No Fall-Damage",function(ass)
+    local oldnamecall = nil
+    oldnamecall = hookmetamethod(game, "__namecall", function(self, ...)    
+    local args = {...}    
+    local method = getnamecallmethod()
+    if method == "FireServer" and tostring(self) == "HURT" then        
+    return 0    
+end
+return oldnamecall(self, ...) end)
+end)
+
+
 
 local WSSlider = Character:AddSlider("WalkSpeed", 1, 16, 200, 1, function(Value)
     getgenv().Settings.CharacterSettings.WalkSpeed = Value
@@ -259,11 +290,22 @@ mt.__index = function(o, k)
 end
 end)
 
+local charToggleMain = Armor:AddToggle('Enabled', false, function(State)
+    getgenv().Settings.ArmorDurability.Toggle = State
+end)
+
+local KillAuraRange = Armor:AddSlider("Armor Durabiliy", 1, 125, 125, 1, function(Value)
+    getgenv().Settings.ArmorDurability.Value = Value
+end)
+
 while wait(.1) do
     if getgenv().Settings.KillAuraSettings.Toggle == true then
         getgenv().MainModule.Functions.KillAuraFunction(getgenv().Settings.KillAuraSettings.Range,getgenv().Settings.KillAuraSettings.DrawLines)
     end
     if getgenv().Settings.CharacterSettings.Toggle == true then
         getgenv().MainModule.Functions.CharacterFunction(getgenv().Settings.CharacterSettings.WalkSpeed,getgenv().Settings.CharacterSettings.JumpPower)
+    end
+    if getgenv().Settings.ArmorDurability.Toggle == true then
+        if game:GetService("Players").LocalPlayer.Character:FindFirstChild("ARMOR_Torso") ~= nil then  game:GetService("Players").LocalPlayer.Character["ARMOR_Torso"].ArmorBlockScript.Durability.Value = tonumber(getgenv().Settings.ArmorDurability.Value) end 
     end
 end
